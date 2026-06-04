@@ -74,17 +74,17 @@ export function DropdownItem({
       type="button"
       onClick={onClick}
       className={cn(
-        'w-full flex items-center justify-between gap-3 px-2 py-2 text-btn text-left cursor-pointer transition-colors',
+        'w-full flex items-center justify-between gap-3 px-2 py-2 text-btn cursor-pointer transition-colors',
         active
           ? 'bg-primary-soft text-primary'
           : 'text-fg hover:bg-hover',
       )}
     >
-      <span className="flex min-w-0 flex-1 items-center gap-2 text-left">
-        {icon && <span className="shrink-0">{icon}</span>}
-        <span className="min-w-0 flex-1 truncate">{children}</span>
+      <span className="flex items-center gap-2">
+        {icon}
+        {children}
       </span>
-      {trailing && <span className="shrink-0">{trailing}</span>}
+      {trailing}
     </button>
   );
 }
