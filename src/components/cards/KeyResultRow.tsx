@@ -12,6 +12,7 @@ export interface KeyResult {
   key: string;
   status: KeyStatus;
   statusCode?: number;
+  error?: string;
   balance?: string;
 }
 
@@ -36,6 +37,13 @@ export function KeyResultRow({ data, onStatusClick }: KeyResultRowProps) {
   };
 
   const badge = statusToBadge[data.status];
+  const canOpenDetails = Boolean(
+    onStatusClick
+    && ['invalid', 'rate-limited', 'cancelled'].includes(data.status),
+  );
+  const errorLabel = data.error
+    ? t(data.error, { defaultValue: t(`errorMessages.${data.error}`, { defaultValue: data.error }) })
+    : '';
 
   const onCopy = async () => {
     try {
@@ -47,9 +55,23 @@ export function KeyResultRow({ data, onStatusClick }: KeyResultRowProps) {
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 px-4 py-2 rounded-card border border-border bg-surface">
-      <Badge tone={badge.tone} className="shrink-0">
-        {badge.label}
-      </Badge>
+      {canOpenDetails ? (
+        <button
+          type="button"
+          onClick={() => onStatusClick?.(data.key)}
+          className="shrink-0 cursor-pointer"
+          title={t('viewErrorDetails')}
+          aria-label={t('viewErrorDetails')}
+        >
+          <Badge tone={badge.tone}>
+            {badge.label}
+          </Badge>
+        </button>
+      ) : (
+        <Badge tone={badge.tone} className="shrink-0">
+          {badge.label}
+        </Badge>
+      )}
 
       <div className="flex flex-col gap-2 min-w-0 flex-1">
         <div className="flex items-center gap-3 min-w-0">
@@ -85,8 +107,19 @@ export function KeyResultRow({ data, onStatusClick }: KeyResultRowProps) {
               type="button"
               onClick={() => onStatusClick?.(data.key)}
               className="hover:text-fg hover:underline cursor-pointer"
+              title={t('viewErrorDetails')}
             >
               ({data.statusCode})
+            </button>
+          )}
+          {errorLabel && (
+            <button
+              type="button"
+              onClick={() => onStatusClick?.(data.key)}
+              className="min-w-0 truncate hover:text-fg hover:underline cursor-pointer"
+              title={t('viewErrorDetails')}
+            >
+              {errorLabel}
             </button>
           )}
           {data.balance && <span>{t('balance.title')}：{data.balance}</span>}

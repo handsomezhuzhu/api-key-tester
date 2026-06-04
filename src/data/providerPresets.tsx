@@ -55,7 +55,7 @@ export const PROVIDER_PRESETS: Record<ProviderType, ProviderPreset> = {
   claude: {
     name: 'Claude',
     defaultBaseUrl: 'https://api.anthropic.com/v1',
-    defaultModel: 'claude-3-5-sonnet-20241022',
+    defaultModel: 'claude-3-5-haiku-20241022',
     defaultEndpoint: '/messages',
     defaultAuthHeader: 'x-api-key',
     defaultAuthPrefix: '',
@@ -63,12 +63,11 @@ export const PROVIDER_PRESETS: Record<ProviderType, ProviderPreset> = {
     defaultExtraHeaders: '{"anthropic-version":"2023-06-01"}',
     defaultQueryParamAuth: false,
     modelOptions: [
-      'claude-3-5-sonnet-20241022',
       'claude-3-5-haiku-20241022',
-      'claude-3-7-sonnet-20250219',
       'claude-sonnet-4-20250514',
       'claude-opus-4-20250514',
       'claude-opus-4-1-20250805',
+      'claude-3-7-sonnet-20250219',
     ],
     icon: (
       <SvgIcon>
@@ -84,7 +83,7 @@ export const PROVIDER_PRESETS: Record<ProviderType, ProviderPreset> = {
   gemini: {
     name: 'Gemini',
     defaultBaseUrl: 'https://generativelanguage.googleapis.com/v1beta',
-    defaultModel: 'gemini-2.0-flash',
+    defaultModel: 'gemini-2.5-flash-lite',
     defaultEndpoint: '/models/{model}:generateContent',
     defaultAuthHeader: '',
     defaultAuthPrefix: '',
@@ -92,10 +91,10 @@ export const PROVIDER_PRESETS: Record<ProviderType, ProviderPreset> = {
     defaultExtraHeaders: '',
     defaultQueryParamAuth: true,
     modelOptions: [
-      'gemini-2.0-flash',
-      'gemini-2.5-flash',
       'gemini-2.5-flash-lite',
+      'gemini-2.5-flash',
       'gemini-2.5-pro',
+      'gemini-2.0-flash',
     ],
     icon: (
       <SvgIcon>
@@ -111,14 +110,14 @@ export const PROVIDER_PRESETS: Record<ProviderType, ProviderPreset> = {
   deepseek: {
     name: 'DeepSeek',
     defaultBaseUrl: 'https://api.deepseek.com/v1',
-    defaultModel: 'deepseek-chat',
+    defaultModel: 'deepseek-v4-flash',
     defaultEndpoint: '/chat/completions',
     defaultAuthHeader: 'Authorization',
     defaultAuthPrefix: 'Bearer ',
     defaultBalanceEndpoint: '/user/balance',
     defaultExtraHeaders: '',
     defaultQueryParamAuth: false,
-    modelOptions: ['deepseek-chat', 'deepseek-reasoner'],
+    modelOptions: ['deepseek-v4-flash', 'deepseek-v4-pro', 'deepseek-chat', 'deepseek-reasoner'],
     icon: (
       <SvgIcon>
         <path
@@ -159,7 +158,7 @@ export const PROVIDER_PRESETS: Record<ProviderType, ProviderPreset> = {
   xai: {
     name: 'xAI',
     defaultBaseUrl: 'https://api.x.ai/v1',
-    defaultModel: 'grok-2-1212',
+    defaultModel: 'grok-4-fast-non-reasoning-latest',
     defaultEndpoint: '/chat/completions',
     defaultAuthHeader: 'Authorization',
     defaultAuthPrefix: 'Bearer ',
@@ -167,13 +166,14 @@ export const PROVIDER_PRESETS: Record<ProviderType, ProviderPreset> = {
     defaultExtraHeaders: '',
     defaultQueryParamAuth: false,
     modelOptions: [
-      'grok-2-1212',
-      'grok-2-vision-1212',
-      'grok-3',
-      'grok-3-fast',
-      'grok-3-mini',
-      'grok-3-mini-fast',
+      'grok-4-fast-non-reasoning-latest',
+      'grok-4-fast-reasoning-latest',
+      'grok-4-1-fast-non-reasoning-latest',
+      'grok-4-1-fast-reasoning-latest',
+      'grok-4',
       'grok-4-0709',
+      'grok-3-fast',
+      'grok-3',
     ],
     icon: (
       <SvgIcon>

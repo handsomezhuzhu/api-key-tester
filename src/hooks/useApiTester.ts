@@ -84,6 +84,7 @@ export function useApiTester(activeConfigId: string | null) {
             ...r,
             status: isStatus(upd.status) ? upd.status : 'pending',
             statusCode: upd.statusCode,
+            error: upd.error,
           };
         });
       }

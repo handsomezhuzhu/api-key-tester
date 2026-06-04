@@ -39,16 +39,26 @@ export function KeyLogModal({ open, onClose, log }: KeyLogModalProps) {
                   </span>
                 )}
               </div>
+              {event.message && (
+                <div>
+                  <span className="text-body text-fg-muted">{t('logViewer.message')}: </span>
+                  <span className="text-body text-fg break-words">{event.message}</span>
+                </div>
+              )}
               {event.requestUrl && (
                 <div>
                   <span className="text-body text-fg-muted">{t('logViewer.request')}: </span>
                   <span className="text-body text-fg font-mono text-xs break-all">{event.requestUrl}</span>
                 </div>
               )}
-              {event.responseBody && (
+              {event.responseBody ? (
                 <pre className="text-body text-fg font-mono text-xs whitespace-pre-wrap break-all bg-canvas rounded p-2 max-h-[200px] overflow-y-auto">
                   {formatJson(event.responseBody)}
                 </pre>
+              ) : (
+                <p className="text-body text-fg-muted bg-canvas rounded p-2">
+                  {t('logViewer.noResponseBody')}
+                </p>
               )}
             </div>
           ))

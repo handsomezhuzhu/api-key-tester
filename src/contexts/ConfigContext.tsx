@@ -26,6 +26,40 @@ const BUILTIN_TYPES: ProviderType[] = [
   'siliconcloud', 'xai', 'openrouter', 'moonshot',
 ];
 
+const LEGACY_DEFAULT_MODELS: Partial<Record<ProviderType, string>> = {
+  claude: 'claude-3-5-sonnet-20241022',
+  gemini: 'gemini-2.0-flash',
+  deepseek: 'deepseek-chat',
+  xai: 'grok-2-1212',
+};
+
+const LEGACY_PRESET_MODELS: Partial<Record<ProviderType, string[]>> = {
+  claude: [
+    'claude-3-5-sonnet-20241022',
+    'claude-3-5-haiku-20241022',
+    'claude-3-7-sonnet-20250219',
+    'claude-sonnet-4-20250514',
+    'claude-opus-4-20250514',
+    'claude-opus-4-1-20250805',
+  ],
+  gemini: [
+    'gemini-2.0-flash',
+    'gemini-2.5-flash',
+    'gemini-2.5-flash-lite',
+    'gemini-2.5-pro',
+  ],
+  deepseek: ['deepseek-chat', 'deepseek-reasoner'],
+  xai: [
+    'grok-2-1212',
+    'grok-2-vision-1212',
+    'grok-3',
+    'grok-3-fast',
+    'grok-3-mini',
+    'grok-3-mini-fast',
+    'grok-4-0709',
+  ],
+};
+
 function createBuiltinConfigs(): ProviderConfig[] {
   return BUILTIN_TYPES.map((provider) => {
     const preset = PROVIDER_PRESETS[provider];
@@ -76,6 +110,13 @@ function loadState(): ConfigState {
         if (isEncrypted(cfg.apiKeys)) {
           encryptedApiKeys.set(cfg.id, cfg.apiKeys);
           cfg.apiKeys = '';
+        }
+        if (saved_.model === LEGACY_DEFAULT_MODELS[b.provider]) {
+          cfg.model = b.model;
+        }
+        const legacyPresetModels = LEGACY_PRESET_MODELS[b.provider]?.join(', ');
+        if (legacyPresetModels && saved_.presetModels === legacyPresetModels) {
+          cfg.presetModels = b.presetModels;
         }
         return cfg;
       });

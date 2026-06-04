@@ -80,11 +80,94 @@ function buildPayload(config: TestConfig): string {
     });
   }
   // OpenAI-compatible format (works for OpenAI, DeepSeek, SiliconCloud, xAI, OpenRouter, Claude)
-  return JSON.stringify({
+  const payload: Record<string, unknown> = {
     model: config.model,
     messages: [{ role: 'user', content: 'Hi' }],
-    max_tokens: 1,
-  });
+  };
+  if (usesMaxCompletionTokens(config)) {
+    payload.max_completion_tokens = 16;
+  } else {
+    payload.max_tokens = 16;
+  }
+  return JSON.stringify(payload);
+}
+
+function usesMaxCompletionTokens(config: TestConfig): boolean {
+  if (config.provider !== 'openai') return false;
+  return /^(gpt-5|gpt-4\.1|o\d)/i.test(config.model);
+}
+
+interface ApiErrorShape {
+  message?: string;
+  type?: string;
+  code?: string | number;
+  param?: string;
+  metadata?: {
+    raw?: string;
+    provider_name?: string;
+    is_byok?: boolean;
+  };
+}
+
+function parseJsonObject(raw: string): Record<string, unknown> | undefined {
+  try {
+    const data = JSON.parse(raw);
+    return data && typeof data === 'object' ? data as Record<string, unknown> : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function getApiError(data: Record<string, unknown> | undefined): ApiErrorShape | undefined {
+  const error = data?.error;
+  return error && typeof error === 'object' ? error as ApiErrorShape : undefined;
+}
+
+function getNestedRawError(error: ApiErrorShape | undefined): ApiErrorShape | undefined {
+  if (!error?.metadata?.raw) return undefined;
+  return getApiError(parseJsonObject(error.metadata.raw));
+}
+
+function textOf(value: unknown): string {
+  return value == null ? '' : String(value).toLowerCase();
+}
+
+function errorText(error: ApiErrorShape | undefined): string {
+  if (!error) return '';
+  return [
+    error.message,
+    error.type,
+    error.code,
+    error.param,
+  ].map(textOf).filter(Boolean).join(' ');
+}
+
+function isAuthError(error: ApiErrorShape | undefined): boolean {
+  const text = errorText(error);
+  return text.includes('auth')
+    || text.includes('invalid api key')
+    || text.includes('incorrect api key')
+    || text.includes('unauthorized')
+    || text.includes('permission')
+    || text.includes('forbidden');
+}
+
+function isRateLimitError(error: ApiErrorShape | undefined): boolean {
+  const text = errorText(error);
+  return text.includes('rate limit')
+    || text.includes('too many requests')
+    || text.includes('quota exceeded')
+    || text.includes('rate_limit')
+    || text.includes('速率限制');
+}
+
+function isRequestValidationError(error: ApiErrorShape | undefined): boolean {
+  const text = errorText(error);
+  return text.includes('invalid_request_error')
+    || text.includes('integer_below_min_value')
+    || text.includes('invalid parameter')
+    || text.includes('below minimum value')
+    || text.includes('unsupported parameter');
 }
 
 /** Combine an optional external cancellation signal with a timeout signal. */
@@ -108,6 +191,9 @@ export async function testKey(key: string, config: TestConfig, externalSignal?: 
   try {
     const res = await fetch(url, { method: 'POST', headers, body, signal: combineSignals(externalSignal, 30000) });
     responseBody = await res.text();
+    const parsed = responseBody.trim() ? parseJsonObject(responseBody) : undefined;
+    const apiError = getApiError(parsed);
+    const rawProviderError = getNestedRawError(apiError);
 
     if (res.status === 401) return result({ error: 'authFailed', statusCode: 401 });
     if (res.status === 403) return result({ error: 'permissionDenied', statusCode: 403 });
@@ -123,16 +209,23 @@ export async function testKey(key: string, config: TestConfig, externalSignal?: 
       } catch { return result({ error: 'parseError', statusCode: 400 }); }
     }
 
+    const relevantError = rawProviderError || apiError;
+    if (res.status === 400 && isRequestValidationError(relevantError) && !isAuthError(relevantError)) {
+      return result({ valid: true, statusCode: 400 });
+    }
+    if (isRateLimitError(relevantError)) {
+      return result({ error: 'rateLimited', isRateLimit: true, statusCode: res.status });
+    }
+
     if (!res.ok) return result({ error: 'httpError', statusCode: res.status });
     if (!responseBody.trim()) return result({ error: 'emptyResponse' });
 
-    let data: Record<string, unknown> | undefined;
-    try { data = JSON.parse(responseBody); } catch { return result({ error: 'parseError' }); }
+    const data = parsed;
+    if (!data) return result({ error: 'parseError' });
 
-    if (data?.error) {
-      const msg = (data.error as { message?: string; type?: string }).message || '';
-      const lower = msg.toLowerCase();
-      if (lower.includes('rate limit') || lower.includes('too many requests') || lower.includes('quota exceeded') || lower.includes('速率限制')) {
+    if (apiError) {
+      const msg = apiError.message || '';
+      if (isRateLimitError(apiError)) {
         return result({ error: 'rateLimited', isRateLimit: true });
       }
       return result({ error: msg || 'unknownError' });
@@ -159,7 +252,7 @@ export async function testPaidKey(key: string, baseUrl: string, externalSignal?:
   const url = `${baseUrl.replace(/\/+$/, '')}/cachedContents`;
   const longText = Array(128).fill('You are an expert at analyzing transcripts.').join(' ');
   const body = JSON.stringify({
-    model: 'models/gemini-2.5-flash',
+    model: 'models/gemini-2.5-flash-lite',
     contents: [{ parts: [{ text: longText }], role: 'user' }],
     ttl: '30s',
   });

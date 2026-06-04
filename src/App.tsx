@@ -246,10 +246,9 @@ export default function App() {
   };
 
   const handleStatusClick = useCallback((keyId: string) => {
-    if (!advanced.verboseLog) return;
     setSelectedLogKey(keyId);
     setLogModalOpen(true);
-  }, [advanced.verboseLog]);
+  }, []);
 
   const showPaid = activeConfig?.provider === 'gemini' && advanced.paidCheck;
 
@@ -295,9 +294,7 @@ export default function App() {
         provider={activeConfig?.provider}
       />
 
-      {advanced.verboseLog && (
-        <KeyLogModal open={logModalOpen} onClose={() => setLogModalOpen(false)} log={selectedLog} />
-      )}
+      <KeyLogModal open={logModalOpen} onClose={() => setLogModalOpen(false)} log={selectedLog} />
     </AppShell>
   );
 }
