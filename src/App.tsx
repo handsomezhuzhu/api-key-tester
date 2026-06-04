@@ -44,7 +44,6 @@ export default function App() {
   const [advanced, setAdvanced] = useState<AdvancedSettings>(
     { ...DEFAULT_ADVANCED, ...(activeConfig?.advanced || {}) },
   );
-  const [isCustomModel, setIsCustomModel] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [detectedModels, setDetectedModels] = useState<string[]>([]);
 
@@ -106,7 +105,6 @@ export default function App() {
       setModel(activeConfig.model);
       setKeysText(activeConfig.apiKeys);
       setAdvanced({ ...DEFAULT_ADVANCED, ...(activeConfig.advanced || {}) });
-      setIsCustomModel(false);
       // Reset detected models only when actually switching to a different config,
       // not when the same config's content changes (e.g. via ConfigEditorModal).
       if (lastConfigIdRef.current !== activeConfigId) {
@@ -266,8 +264,6 @@ export default function App() {
             providerType={activeConfig?.provider ?? 'openai'}
             presetModels={activeConfig?.presetModels}
             detectedModels={detectedModels.join(', ')}
-            isCustomModel={isCustomModel}
-            onCustomize={() => setIsCustomModel((v) => !v)}
             onFetchModels={handleFetchModels}
             isFetchingModels={isFetchingModels}
           />
