@@ -193,7 +193,7 @@ export const PROVIDER_PRESETS: Record<ProviderType, ProviderPreset> = {
     defaultEndpoint: '/chat/completions',
     defaultAuthHeader: 'Authorization',
     defaultAuthPrefix: 'Bearer ',
-    defaultBalanceEndpoint: '',
+    defaultBalanceEndpoint: '/credits',
     defaultExtraHeaders: '',
     defaultQueryParamAuth: false,
     modelOptions: ['deepseek/deepseek-chat-v3.1:free'],

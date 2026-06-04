@@ -118,6 +118,9 @@ function loadState(): ConfigState {
         if (legacyPresetModels && saved_.presetModels === legacyPresetModels) {
           cfg.presetModels = b.presetModels;
         }
+        if (b.provider === 'openrouter' && !saved_.advanced?.balanceEndpoint) {
+          cfg.advanced.balanceEndpoint = b.advanced.balanceEndpoint;
+        }
         return cfg;
       });
 

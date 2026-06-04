@@ -350,6 +350,14 @@ export async function fetchBalance(
     if (data?.balance != null) return { success: true, balance: String(data.balance), error: null };
     if (data?.total_balance != null) return { success: true, balance: String(data.total_balance), error: null };
     if (data?.data?.balance != null) return { success: true, balance: String(data.data.balance), error: null };
+    // OpenRouter: { data: { total_credits, total_usage } }
+    if (data?.data?.total_credits != null && data?.data?.total_usage != null) {
+      const totalCredits = Number(data.data.total_credits);
+      const totalUsage = Number(data.data.total_usage);
+      if (Number.isFinite(totalCredits) && Number.isFinite(totalUsage)) {
+        return { success: true, balance: String(Number((totalCredits - totalUsage).toFixed(6))), error: null };
+      }
+    }
     // DeepSeek: { balance_infos: [{ currency, total_balance, ... }] }
     if (data?.balance_infos && Array.isArray(data.balance_infos) && data.balance_infos.length > 0) {
       const info = data.balance_infos[0] as { currency?: string; total_balance?: string };
